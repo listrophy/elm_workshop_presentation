@@ -19,6 +19,19 @@ module.exports = function(grunt) {
 				' */'
 		},
 
+		htmlbuild: {
+			dist: {
+				src: 'template.html',
+				dest: 'index.html',
+				options: {
+					beautify: true,
+					sections: {
+						slides: 'html/**/*.html'
+					}
+				}
+			}
+		},
+
 		qunit: {
 			files: [ 'test/*.html' ]
 		},
@@ -132,6 +145,10 @@ module.exports = function(grunt) {
 			html: {
 				files: root.map(path => path + '/*.html')
 			},
+			slides: {
+				files: root.map(path => path + '/html/**/*.html'),
+				tasks: 'htmlbuild'
+			},
 			markdown: {
 				files: root.map(path => path + '/*.md')
 			},
@@ -159,6 +176,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks( 'grunt-autoprefixer' );
 	grunt.loadNpmTasks( 'grunt-zip' );
 	grunt.loadNpmTasks( 'grunt-retire' );
+	grunt.loadNpmTasks( 'grunt-html-build' );
 
 	// Default task
 	grunt.registerTask( 'default', [ 'css', 'js' ] );
