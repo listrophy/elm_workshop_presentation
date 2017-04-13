@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 				src: 'template.html',
 				dest: 'index.html',
 				options: {
-					beautify: true,
+					beautify: false,
 					sections: {
 						slides: 'html/**/*.html'
 					}
