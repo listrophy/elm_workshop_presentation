@@ -56,6 +56,13 @@ module.exports = function(grunt) {
 				files: [
 					{
 						expand: true,
+						cwd: 'css',
+						src: ['custom.scss'],
+						dest: 'css',
+						ext: '.css'
+					},
+					{
+						expand: true,
 						cwd: 'css/theme/source',
 						src: ['*.scss'],
 						dest: 'css/theme',
@@ -135,7 +142,7 @@ module.exports = function(grunt) {
 				tasks: 'js'
 			},
 			theme: {
-				files: [ 'css/theme/source/*.scss', 'css/theme/template/*.scss' ],
+				files: [ 'css/theme/source/*.scss', 'css/theme/template/*.scss', 'css/custom.scss' ],
 				tasks: 'css-themes'
 			},
 			css: {
@@ -146,7 +153,7 @@ module.exports = function(grunt) {
 				files: root.map(path => path + '/*.html')
 			},
 			slides: {
-				files: root.map(path => path + '/html/**/*.html'),
+				files: root.map(path => path + '/html/*.html'),
 				tasks: 'htmlbuild'
 			},
 			markdown: {

@@ -1,0 +1,404 @@
+
+<section>
+  <h1>Mini-Exercises</h1>
+</section>
+
+<section>
+  <h1>Score Keeper</h1>
+</section>
+
+<section>
+  <h2>Score Keeper Definition Statement</h2>
+
+  <p>In order to track my team's score<br/>
+    As a score keeper<br/>
+    I want to increment their score</p>
+</section>
+
+<section>
+  <h2>Score Keeper</h2>
+  <pre><code data-trim data-noescape class="elm">
+    module Main exposing (main)
+
+    import Html exposing (..)
+
+    main =
+        beginnerProgram
+            { model = initialModel
+            , view = view
+            , update = update
+            }
+	</code></pre>
+</section>
+
+<section>
+  <h2>Score Keeper Model</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type alias Model = Int
+
+    initialModel : Model
+    initialModel =
+        0
+  </code></pre>
+
+</section>
+
+
+<section>
+  <h2>Score Keeper View</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    -- insert at top:
+    import Html.Events exposing (onClick)
+
+    --
+
+    type Msg
+        = Increment
+
+    view : Model -> Html Msg
+    view model =
+        div
+            []
+            [ button [ onClick Increment ] [ text "+" ]
+            , text (toString model)
+            ]
+  </code></pre>
+
+</section>
+
+
+<section>
+  <h2>Score Keeper Update</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    update : Msg -> Model -> Model
+    update msg model =
+        case msg of
+            Increment ->
+                model + 1
+  </code></pre>
+
+</section>
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+<section>
+  <h1>Change: Basketball</h1>
+</section>
+
+<section>
+  <h2>Basketball</h2>
+  <p>In order to track my basketball team's score<br/>
+    As my team's scorekeeper<br/>
+    I want to increment the score by 1, 2 or 3
+  </p>
+</section>
+
+<section>
+  <h2>Basketball Changes: Model</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    -- No change!
+    type alias Model = Int
+
+    initialModel : Model
+    initialModel =
+        0
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Basketball Changes: Msg</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    type Msg
+        = FreeThrow
+        | JumpShot
+        | ThreePointer
+  </code></pre>
+</section>
+
+<section>
+  <h2>Basketball Changes: View</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    view : Model -> Html Msg
+    view model =
+        div
+            []
+            [ button [ onClick FreeThrow ] [ text "free throw" ]
+            , button [ onClick JumpShot ] [ text "jump shot" ]
+            , button [ onClick ThreePointer ] [ text "trey" ]
+            , text (toString model)
+            ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Basketball Changes: Update</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    update : Msg -> Model -> Model
+    update msg model =
+        case msg of
+            FreeThrow ->
+                model + 1
+            JumpShot ->
+                model + 2
+            ThreePointer ->
+                model + 3
+  </code></pre>
+</section>
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+
+
+
+<section>
+  <h1>Refactor</h1>
+</section>
+
+<section>
+  <h2>Refactor</h2>
+  <p><kbd>FreeThrow</kbd>, <kbd>JumpShot</kbd>, and <kbd>ThreePointer</kbd> seem
+    a bit redundant. Let's use one <kbd>Msg</kbd> to represent all three.</p>
+</section>
+
+
+<section>
+  <h2>Refactor: Model</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    -- No change!
+    type alias Model = Int
+
+    initialModel : Model
+    initialModel =
+        0
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Refactor: Msg</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    type Msg
+        = AddPoints Int
+  </code></pre>
+</section>
+
+<section>
+  <h2>Refactor: View</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    view : Model -> Html Msg
+    view model =
+        div
+            []
+            [ button [ onClick (AddPoints 1) ] [ text "free throw" ]
+            , button [ onClick (AddPoints 2) ] [ text "jump shot" ]
+            , button [ onClick (AddPoints 3) ] [ text "trey" ]
+            , text (toString model)
+            ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Refactor: Update</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    update : Msg -> Model -> Model
+    update msg model =
+        case msg of
+            AddPoints int ->
+                model + int
+  </code></pre>
+</section>
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+
+
+
+
+
+<section>
+  <h1>Oops!</h1>
+</section>
+
+<section>
+  <h2>Undo</h2>
+  <p>I accidentally pressed the wrong button! I need to undo a score.</p>
+</section>
+
+
+<section>
+  <h2>Refactor: Model</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    type alias Model = List Int
+
+    initialModel : Model
+    initialModel =
+        []
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Refactor: Msg</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    type Msg
+        = AddPoints Int
+        | Undo
+  </code></pre>
+</section>
+
+<section>
+  <h2>Refactor: View</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    view : Model -> Html Msg
+    view model =
+        div
+            []
+            [ button [ onClick (AddPoints 1) ] [ text "free throw" ]
+            , button [ onClick (AddPoints 2) ] [ text "jump shot" ]
+            , button [ onClick (AddPoints 3) ] [ text "trey" ]
+            , text (toString <mark>(List.sum model)</mark>)
+            , button [ onClick Undo ] [ text "undo!" ]
+            ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Refactor: Update</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+    update : Msg -> Model -> Model
+    update msg model =
+        case msg of
+            AddPoints int ->
+                int :: model
+            Undo ->
+                List.drop 1 model
+  </code></pre>
+</section>
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+
+
+
+
+
+<section>
+  <h1>Fresh Start: A Clock</h1>
+</section>
+
+<section>
+  <h2>A Clock</h2>
+  <p>Let's move away from "beginnerProgram"</p>
+</section>
+
+
+<section>
+  <h2>A Clock</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    module Main exposing (main)
+
+    import Html exposing (..)
+    import Date
+    import Time
+
+    main =
+        program
+            { init = init
+            , view = view
+            , update = update
+            , subscriptions = subscriptions
+            }
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Clock: Model &amp; Init</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type alias Model = Maybe Time.Time
+
+    init : (Model, Cmd Msg)
+    init =
+        ( Nothing
+        , Cmd.none
+        )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Clock: Msg</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type Msg
+        = Tick Time.Time
+  </code></pre>
+</section>
+
+<section>
+  <h2>Clock: View</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    div [] <mark><|</mark>
+        case model of
+            Just d ->
+                [ text <| ":" ++ toString (Date.second d) ]
+
+            Nothing ->
+                [ text "don't know yet!" ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Clock: Update</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+    case msg of
+        Tick t ->
+            (Just (Date.fromTime t), Cmd.none)
+  </code></pre>
+</section>
+
+<section>
+  <h2>Clock: Subscriptions</h2>
+
+  <pre class="fragment"><code data-trim data-noescape class="elm">
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Time.every (100 * Time.millisecond) Tick
+  </code></pre>
+</section>
+
+<section>
+  <h1>Done!</h1>
+</section>

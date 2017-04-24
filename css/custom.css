@@ -1,0 +1,43 @@
+code:before {
+  display: block;
+  float: right;
+  font-family: sans-serif;
+  font-weight: bold; }
+
+code.ruby, code.erb {
+  background-color: #ffeeee; }
+  code.ruby:before, code.erb:before {
+    background-color: red;
+    color: white; }
+
+code.ruby:before {
+  content: " ruby "; }
+
+code.erb:before {
+  content: " erb "; }
+
+code.elm {
+  background-color: #ecedf1; }
+  code.elm:before {
+    content: " elm ";
+    background-color: #5A6379;
+    color: white; }
+
+code.js {
+  background-color: #e0ffe0; }
+  code.js:before {
+    content: " js ";
+    background-color: #006F00;
+    color: white; }
+
+.reveal section kbd {
+  font-family: monospace;
+  color: #394549;
+  background-color: white; }
+
+.reveal .slides section .fragment.highlight-background-yellow {
+  opacity: 1;
+  visibility: inherit; }
+
+.reveal .slides section .fragment.highlight-background-yellow.visible {
+  background-color: #ffff00 !important; }

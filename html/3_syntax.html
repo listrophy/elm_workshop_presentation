@@ -1,0 +1,330 @@
+<section>
+  <h1>Syntax</h1>
+</section>
+
+<section>
+  <h2>A Really Basic File</h2>
+  <p>Just a grab-bag to show syntax:</p>
+  <pre><code data-trim data-noescape class="elm">
+    module Trilean
+        exposing
+            ( Reason
+            , Trilean
+            , isSure
+            , reason
+            )
+
+    -- ...
+  </code></pre>
+</section>
+
+<section>
+  <pre><code data-trim data-noescape class="elm">
+    -- ...
+
+    type alias Reason =
+        String
+
+    type Trilean
+        = Yes
+        | No
+        | Other Reason
+
+    -- ...
+  </code></pre>
+</section>
+
+<section>
+  <pre><code data-trim data-noescape class="elm">
+    -- ...
+
+    <span class="fragment highlight-background-yellow">isSure : Trilean -> Bool</span>
+    isSure trilean =
+        case trilean of
+            Yes ->
+                True
+
+            _ ->
+                False
+
+    -- ...
+  </code></pre>
+</section>
+
+<section>
+    <pre><code data-trim data-noescape class="elm">
+    -- ...
+
+    reason : Trilean -> Maybe String
+    reason trilean =
+        case trilean of
+            Other str ->
+                Just str
+
+            _ ->
+                Nothing
+
+    -- ...
+  </code></pre>
+</section>
+
+<section>
+  <h2>Whoa Whoa Whoa... Maybe?</h2>
+
+  <dl>
+    <dt><code>String</code></dt>
+    <dd>A <kbd>String</kbd> that can <strong>never</strong> be nil</dd>
+    <dt><code>Maybe String</code></dt>
+    <dd>A box containing either <kbd>Nothing</kbd> or <kbd>Just</kbd> a <kbd>String</kbd></dd>
+  </dl>
+  <hr class="fragment" data-fragment-index="1" />
+  <p class="fragment" data-fragment-index="1"><strong>Important:</strong> You cannot use a <kbd>Maybe String</kbd> like
+    a <kbd>String</kbd> any more than you can use an <kbd>Array</kbd> of <kbd>String</kbd>s like
+    a single <kbd>String</kbd> in Ruby.
+  </p>
+</section>
+
+<section>
+  <h2>Speaking of Lists...</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    singleDigitInts : List Int
+    singleDigitInts =
+        [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+        -- or `List.range 0 9`
+
+    doubleList : List Int -> List Int
+    doubleList list =
+        List.map <span class="fragment highlight-background-yellow">(\int -> 2 * int)</span> list
+        -- in Ruby:
+        -- list.map { |int| 2 * int }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Regarding "map"</h2>
+
+  <dl>
+    <dt><kbd>Namespace.map f wrapper</kbd></dt>
+    <dd>Perform the function "f" on the data inside "wrapper", in the way
+      that makes sense for the <em>type</em> of the "wrapper" as redundantly
+      indicated by "Namespace."</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Regarding "map"</h2>
+
+  <dl>
+    <dt><kbd>List.map f list</kbd></dt>
+    <dd>Perform "f" on each item in the "list"</dd>
+    <dt class="fragment" data-fragment-index="1"><kbd>Maybe.map f maybeThing</kbd></dt>
+    <dd class="fragment" data-fragment-index="1">Perform "f" on the item in the "maybeThing," assuming it's not "Nothing."</dd>
+    <dt class="fragment" data-fragment-index="2"><kbd>Dict.map f dictionary</kbd></dt>
+    <dd class="fragment" data-fragment-index="2">Replace each value in "dictionary" with the result of applying "f" to each key-value pair.</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Typical "map" Signature</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    map : (a -> b) -> ConcreteType a -> ConcreteType b
+
+    -- for List
+    map : (a -> b) -> List a -> List b
+
+    -- for Maybe
+    map : (a -> b) -> Maybe a -> Maybe b
+
+    -- Elm does not have Higher-Kinded Types, so this doesn't work:
+    map&lt;M&gt; : (a -> b) -> M a -> M b
+  </code></pre>
+  <p>Note: Lack of Higher-Kinded Types in this situation means you can't have a generic
+    <kbd>map</kbd> function that works on anything "mappable."</p>
+</section>
+
+<section>
+  <h2><kbd>Let</kbd>'s Take it Easy</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    normalizeString : String -> String
+    normalizeString input =
+        <mark>let</mark>
+            trimmed = String.trim input
+            lower = String.toLower trimmed
+        <mark>in</mark>
+            String.padLeft 8 ' ' lower
+  </code></pre>
+</section>
+
+<section>
+  <h2>Guzinta!</h2>
+  <p>ok, ok, "forward function application"</p>
+
+  <pre><code data-trim data-noescape class="elm">
+    normalizeString : String -> String
+    normalizeString input =
+        let
+            trimmed = String.trim input
+            lower = String.toLower trimmed
+        in
+            String.padLeft 8 ' ' lower
+
+    alsoNormalizeString : String -> String
+    alsoNormalizeString input =
+        input
+          |> String.trim
+          |> String.toLower
+          |> <span class="fragment highlight-background-yellow">String.padLeft 8 ' '</span>
+  </code></pre>
+</section>
+
+<section>
+  <h2>Partial Application</h2>
+
+  <p>You can supply only <em>some</em> arguments to <strong>any</strong> function,
+    though only from left-to-right.</p>
+
+    <pre><code data-trim data-noescape class="elm">
+      -- type signature of String.padLeft:
+      padLeft : Int -> Char -> String -> String
+
+      -- effective type signature of String.padLeft:
+      padLeft : Int -> (Char -> (String -> String))
+    </code></pre>
+
+    <p>Therefore, if you know the padding width, but not the padding char or the string, you can do:</p>
+    <pre><code data-trim data-noescape class="elm">
+      String.padLeft 8
+        -- &lt;function&gt; : Char -> String -> String
+    </code></pre>
+</section>
+
+<section>
+  <h2>What about Compositiion?</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    alsoNormalizeString : String -> String
+    alsoNormalizeString input =
+        input
+          |> String.trim
+          |> String.toLower
+          |> String.padLeft 8 ' '
+
+    moreNormalizeString : String -> String
+    moreNormalizeStri<span class="fragment highlight-background-yellow">ng =</span>
+      String.trim >> String.toLower >> String.padLeft 8 ' '
+  </code></pre>
+  <p>Note: This is kinda advanced and not completely necessary for the purposes
+    of this workshop</p>
+</section>
+
+<section>
+  <h2>Avoiding parens</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    parenNormalizeString : String -> String
+    parenNormalizeString input =
+        String.padLeft 8 ' ' (String.toLower (String.trim input))
+
+    anotherNormalizeString : String -> String
+    anotherNormalizeString input =
+        String.padLeft 8 ' ' <| String.toLower <| String.trim input
+  </code></pre>
+  <p>Note: Much like in Ruby, the balance between using and not using parens
+    is subject to much debate</p>
+</section>
+
+<section>
+  <h2>Primitives!</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    x = 42              -- Int
+    y = 3.14            -- Float
+    c = '.'             -- Char (rarely used)
+    s = "hello world"   -- String
+    l = []              -- List a
+    t = (1, "foo", 4.0) -- Tuple of type (Int, String, Float)
+
+    -- Record of type { foo : String, bar : Int }
+    r = { foo = "foo", bar = 123}
+  </code></pre>
+</section>
+
+<section>
+  <h2>Common, Built-in Types</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    -- Bool
+    b1 = True
+    b2 = False
+
+    -- Maybe a
+    -- here, "Maybe String"
+    m1 = Just "a string"
+    m2 = Nothing
+
+    -- Result a b
+    -- here, "Result String Int"
+    r1 = Ok 42
+    r2 = Err "error message"
+  </code></pre>
+</section>
+
+<section>
+  <h2>Type Definitions</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    -- ours
+    type Trilean
+      = Yes
+      | No
+      | Other Reason
+
+    -- builtin
+    type Result a b
+      = Err a
+      | Ok b
+
+    type Maybe a
+      = Just a
+      | Nothing
+  </code></pre>
+</section>
+
+<section>
+  <h2>Types vs. Values of Types</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type Maybe a
+      = Just a
+      | Nothing
+
+    -- Type constructors
+    Just : a -> Maybe a
+    Nothing : Maybe a
+
+    type Result a b
+      = Err a
+      | Ok b
+  </code></pre>
+</section>
+
+<section>
+  <h2>Using Type Signatures</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    -- List
+    first : List a -> Maybe a
+
+    -- String
+    join : String -> List String -> String
+
+    -- Json.Decode
+    decodeString : Decoder a -> String -> Result String a
+
+    -- List
+    filter : (a -> Bool) -> List a -> List a
+  </code></pre>
+</section>

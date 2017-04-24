@@ -1,0 +1,289 @@
+<section>
+  <h1>Compare/Contrast with Ruby</h1>
+</section>
+
+<style>
+  [data-columns] {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  [data-columns] h2 {
+    flex: 1 0 100%;
+  }
+  [data-columns] .column {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+  }
+</style>
+
+<section>
+<h2>Some Similarities</h2>
+
+<ul>
+  <li class="fragment">Strings, Numbers, Dicts<sup>&#42;</sup>, Arrays<sup>&#42;</sup></li>
+  <li class="fragment">Modules</li>
+  <li class="fragment">Functions, but not <i>methods</i></li>
+  <li class="fragment">Last expression is return value</li>
+  <li class="fragment">Avoid parens where possible</li>
+  <li class="fragment">(Rails) Directory Structure => Module Structure</li>
+</ul>
+</section>
+
+<section>
+  <h1>Some Differences</h1>
+</section>
+
+<section>
+  <h2>Functions, not Methods</h2>
+  <pre><code data-trim data-noescape class="ruby">
+    [3, 1, 2].sort
+      # => [1, 2, 3]
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+    List.sort [3, 1, 2]
+      -- => [1, 2, 3]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Functions, not Methods (pt 2)</h2>
+  <pre><code data-trim data-noescape class="ruby">
+    ["a", "b", "c"].join " "
+      # => "a b c"
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+    String.join " " ["a", "b", "c"]
+      -- => "a b c"
+  </code></pre>
+
+  <p>Note: No commas between args</p>
+  <p>Note 2: "Data" acted upon is last arg</p>
+</section>
+
+<section>
+  <h2>Everything is Immutable</h2>
+  <pre><code data-trim data-noescape class="ruby">
+    x = [3, 1, 2]
+    y = x.sort  # Elm equivalent exists
+    x.sort!     # Elm equivalent does not exist
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+    List.sort [3, 1, 2]
+  </code></pre>
+
+</section>
+
+<section>
+  <h2>Super Weird Indentation Conventions</h2>
+  <p>Turns out, they're not actually that bad!</p>
+
+  <pre><code data-trim data-noescape class="ruby">
+aList = [
+  foo,
+  bar,
+  baz
+]
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+aList =
+  [ foo
+  , bar
+  , baz
+  ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Type Strictness</h2>
+
+  <pre><code data-trim data-noescape class="ruby">
+aNumber = 42
+errorMessage =
+  if aNumber
+    "An error of type #{aNumber} occurred."
+  end
+  </code></pre>
+
+  <pre class="fragment" data-fragment-index="1"><code data-trim data-noescape class="elm">
+aNumber = 42
+errorMessage =
+  if aNumber <mark>/=</mark> 0 <mark>then</mark>
+    "An error of type " ++ (<mark>toString</mark> aNumber) ++ " occurred."
+  <mark>else</mark>
+    ""
+  </code></pre>
+
+  <p class="fragment" data-fragment-index="1">
+    <small>Note: There is no "truthy" or "falsey", only "True" or "False"<br>
+      Note: No automatic string conversion<br>
+      Note: All code-paths must yield same type<br>
+      Note: Indentation matters!
+    </small>
+  </p>
+
+</section>
+
+<section>
+  <h2>Explicit Type Signatures Are a Thing</h2>
+  <pre><code data-trim data-noescape class="elm">
+    aValue : String
+    aValue =
+      "foo"
+
+    aFunc : String -> String
+    aFunc stringArg =
+      String.toUpper (String.trim stringArg)
+  </code></pre>
+</section>
+
+<section>
+  <h2>Importing is Not Transitive</h2>
+
+  <pre><code data-trim data-noescape class="ruby">
+    require 'foo'
+
+    # Now everything from 'foo' is available,
+    # INCLUDING everything that 'foo' itself required
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+    import Foo
+
+    -- Now everything from Foo is available but still namespaced
+    -- under "Foo."
+    --
+    -- Nothing that Foo imported in its own file is available here
+    -- unless it's been explicitly "exposed"
+  </code></pre>
+</section>
+
+<section>
+  <h2>Exporting is Specified</h2>
+    <pre><code data-trim data-noescape class="ruby">
+      # in file "foo.rb"
+
+      class Foo; end
+
+      # files that require 'foo' have access to Foo
+    </code></pre>
+
+    <pre><code data-trim data-noescape class="elm">
+      -- in file "Foo.elm"
+
+      module Foo exposing (foo, foo2)
+
+      -- files that "import Foo" can only access
+      -- functions "foo" and "foo2"
+    </code></pre>
+
+    <pre><code data-trim data-noescape class="elm">
+      -- in file "Foo.elm"
+
+      module Foo exposing (..)
+
+      -- files that import 'Foo' can access all functions in Foo
+    </code></pre>
+
+</section>
+
+<section>
+  <h2>Granular, Configurable Importing</h2>
+
+  <pre><code data-trim data-noescape class="ruby">
+    require 'foo'
+
+    # Now everything from 'foo' is available,
+    # INCLUDING everything that 'foo' itself required
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+    import Foo
+    import Bar as B
+    import Baz exposing (..)
+    import Qux exposing (corge)
+
+    Foo.func "a" -- call "func" from module Foo with arg "a"
+    B.func "a" -- call "func" from module Bar with arg "a"
+    bazzle "a" -- call "bazzle" with arg "a",
+               -- which apparently came from Baz
+    corge "a" -- call "corge" from module Qux, with arg "a"
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Case > If-Else</h2>
+
+
+  <pre><code data-trim data-noescape class="ruby">
+    if foo?
+      doSomething
+    else
+      doOtherThing
+    end
+  </code></pre>
+
+
+  <pre><code data-trim data-noescape class="elm">
+    case foo of
+      True ->
+        doSomething
+
+      False ->
+        doOtherThing
+  </code></pre>
+
+  <p>Note: The compiler ensures case statements are exhaustive!</p>
+
+</section>
+
+<section>
+  <h2>Views are Functions, Not Templates</h2>
+
+  <pre><code data-trim class="erb">
+    <% if current_user %>
+      <%= button_to "Log out", destroy_session_path %>
+    <% else %>
+      <%= render partial: 'login' %>
+    <% end %>
+  </code></pre>
+
+
+  <pre><code data-trim data-noescape class="elm">
+    case model.currentUser of
+      User _ ->
+        Html.button
+          [ onClick SignOut ]
+          [ text "Log out" ]
+
+      Anonymous ->
+        loginView
+
+      <span class="fragment">Admin _ ->
+        adminSimulateUserOrLogoutView</span>
+  </code></pre>
+</section>
+
+<section>
+  <h2>Functions are First-Class</h2>
+
+    <pre><code data-trim data-noescape class="js">
+      var logDiv = function(index, div) {
+        console.log(div.innerHTML);
+      };
+
+      $('div').each(logDiv);
+    </code></pre>
+
+
+    <pre><code data-trim data-noescape class="elm">
+      List.map <mark>String.toUpper</mark> ["foo", "bar", "baz"]
+    </code></pre>
+</section>

@@ -1,0 +1,181 @@
+<section>
+  <h2>Semantics</h2>
+  <h3>(Comparing to Rails)</h3>
+</section>
+
+<style>
+  .reveal .slides section .fragment.__highlight-current {
+    opacity: 1;
+    visibility: visible;
+  }
+  .reveal .slides section .fragment.__highlight-current.current-fragment {
+    background-color: #ffff00;
+  }
+</style>
+
+<section>
+  <h2>Model-View-Controller</h2>
+  <h3>Yeah, really!</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+    main =
+        Html.beginnerProgram
+            <span class="fragment __highlight-current" data-fragment-index="1">{ <span class="fragment __highlight-current" data-fragment-index="2">model  = model</span>
+            , <span class="fragment __highlight-current" data-fragment-index="3">view   = view</span>
+            , <span class="fragment __highlight-current" data-fragment-index="4">update = update</span>
+          }</span>
+
+    <span class="fragment __highlight-current" data-fragment-index="2">model : Model
+    model = ...</span>
+
+    <span class="fragment __highlight-current" data-fragment-index="3">view : Model -> Html Msg
+    view model = ...</span>
+
+    <span class="fragment __highlight-current" data-fragment-index="4">update : Msg -> Model -> Model
+    update msg model = ...</span>
+  </code></pre>
+</section>
+
+<section>
+  <h2>Advanced MVC</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    main =
+        Html.<span class="fragment __highlight-current" data-fragment-index="0">program</span>
+            { <span class="fragment __highlight-current" data-fragment-index="1">init = init</span>
+            , view = view
+            , <span class="fragment __highlight-current" data-fragment-index="2">update = update</span>
+            , <span class="fragment __highlight-current" data-fragment-index="3">subscriptions = subscriptions</span>
+            }
+
+    init : <span class="fragment __highlight-current" data-fragment-index="1">(</span>Model<span class="fragment __highlight-current" data-fragment-index="1">, <span class="fragment __highlight-current" data-fragment-index="4">Cmd Msg</span>)</span>
+    view : Model -> <span class="fragment __highlight-current" data-fragment-index="4">Html Msg</span>
+    update : <span class="fragment __highlight-current" data-fragment-index="5">Msg</span> -> Model -> <span class="fragment __highlight-current" data-fragment-index="2">(</span>Model<span class="fragment __highlight-current" data-fragment-index="2">, <span class="fragment __highlight-current" data-fragment-index="4">Cmd Msg</span>)</span>
+    <span class="fragment __highlight-current" data-fragment-index="3">subscriptions : Model -> <span class="fragment __highlight-current" data-fragment-index="4">Sub Msg</span></span>
+  </code></pre>
+</section>
+
+<section>
+  <h1>Diagram Time!</h1>
+</section>
+
+<section>
+  <h2>Init</h2>
+
+  <img src="img/init.png"/>
+</section>
+
+<section>
+  <h2>Init</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type alias Model =
+        { username : String
+        }
+
+    init : (Model, Cmd Msg)
+    init =
+        ( { username = "" }
+        , fetchUserList
+        )
+
+    fetchUserList : Cmd Msg
+    fetchUserList =
+        Http.send ...
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Update</h2>
+
+  <img src="img/update.png"/>
+</section>
+
+<section>
+  <h2>Update</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    type alias Model =
+        { username : String
+        }
+
+    type Msg
+        = UsernameChanged String
+        | ...
+
+    update : Msg -> Model -> (Model, Cmd Msg)
+    update msg model =
+        case msg of
+            UsernameChanged newUsername ->
+                ({model | username = newUsername}, Cmd.none)
+            ... ->
+                ...
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>On Model Change</h2>
+
+  <img src="img/model_change.png"/>
+</section>
+
+<section>
+  <h2>On Model Change</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    subscriptions : Model -> Sub Msg
+    subscriptions model =
+        if model.showClock then
+            Time.every (1 * second) TimerTicked
+        else
+            Sub.none
+
+    view : Model -> Html Msg
+    view model =
+        Html.button
+            [ onClick CalculateClicked ]
+            [ text "do a calculation" ]
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Sending Msg's</h2>
+
+  <img src="img/send_msg.png"/>
+</section>
+
+<section>
+  <h2>Sending Msg's</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+    -- some "typical" Msg values
+    type Msg
+      = UsernameChanged String                 -- Html Msg
+      <span class="fragment">| FieldChanged String String             -- Html Msg</span>
+      <span class="fragment">| CalculateClicked                       -- Html Msg</span>
+      <span class="fragment">| TimerTicked Time                       -- Sub Msg</span>
+      <span class="fragment">| RandomNumberChosen Int                 -- Cmd Msg</span>
+      <span class="fragment">| UserListRecieved (WebData (List User)) -- Cmd Msg</span>
+  </code></pre>
+</section>
+
+<section>
+  <h2>Summary</h2>
+
+  <dl>
+    <dt>init : (Model, Cmd Msg)</dt>
+    <dd>Called on page load. First model, trigger first <kbd>Cmd</kbd>s.</dd>
+    <dt class="fragment" data-fragment-index="1">view : Model -> Html Msg</dt>
+    <dd class="fragment" data-fragment-index="1">Called on model change. Generates HTML.</dd>
+    <dt class="fragment" data-fragment-index="2">subscriptions : Model -> Sub Msg</dt>
+    <dd class="fragment" data-fragment-index="2">Called on model change. Refreshes <kbd>Sub</kbd> list.</dd>
+    <dt class="fragment" data-fragment-index="3">update : Msg -> Model -> (Model, Cmd Msg)</dt>
+    <dd class="fragment" data-fragment-index="3">Called when Elm send a <kbd>Msg</kbd>. Updates model, sends <kbd>Cmd</kbd>s.</dd>
+  </dl>
+</section>
