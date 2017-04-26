@@ -684,16 +684,6 @@ errorMessage =
   <h3>(Comparing to Rails)</h3>
 </section>
 
-<style>
-  .reveal .slides section .fragment.__highlight-current {
-    opacity: 1;
-    visibility: visible;
-  }
-  .reveal .slides section .fragment.__highlight-current.current-fragment {
-    background-color: #ffff00;
-  }
-</style>
-
 <section>
   <h2>Model-View-Controller</h2>
   <h3>Yeah, really!</h3>
@@ -867,6 +857,13 @@ errorMessage =
 </section>
 
 <section>
+  <h2>Reference:</h2>
+  <p style="text-align: center;">package.elm-lang.org</p>
+</section>
+
+<section>
+
+<section>
   <h1>Score Keeper</h1>
 </section>
 
@@ -949,6 +946,10 @@ errorMessage =
   <h1>Done!</h1>
 </section>
 
+</section>
+
+<section>
+
 <section>
   <h1>Change: Basketball</h1>
 </section>
@@ -1023,6 +1024,10 @@ errorMessage =
 </section>
 
 
+</section>
+
+<section>
+
 
 
 <section>
@@ -1093,6 +1098,10 @@ errorMessage =
 
 
 
+
+</section>
+
+<section>
 
 
 
@@ -1167,6 +1176,10 @@ errorMessage =
 
 
 
+</section>
+
+<section>
+
 
 
 <section>
@@ -1225,25 +1238,19 @@ errorMessage =
 </section>
 
 <section>
-  <h2>Clock: View</h2>
+  <h2>Clock: Subscriptions</h2>
 
   <pre><code data-trim data-noescape class="elm">
-view : Model -> Html Msg
-view model =
-    div [] <mark><|</mark>
-        case model of
-            Just d ->
-                [ text <| ":" ++ toString (Date.second d) ]
-
-            Nothing ->
-                [ text "don't know yet!" ]
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Time.every (100 * Time.millisecond) Tick
   </code></pre>
 </section>
 
 <section>
   <h2>Clock: Update</h2>
 
-  <pre class="fragment"><code data-trim data-noescape class="elm">
+  <pre><code data-trim data-noescape class="elm">
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -1253,19 +1260,880 @@ update msg model =
 </section>
 
 <section>
-  <h2>Clock: Subscriptions</h2>
+  <h2>Clock: View</h2>
 
-  <pre class="fragment"><code data-trim data-noescape class="elm">
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Time.every (100 * Time.millisecond) Tick
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    div [] <mark><|</mark>
+        case model of
+            Just d ->
+                [ text <| toString (Date.hour d)
+                , text ":"
+                , text <| toString (Date.minute d)
+                , text ":"
+                , text <| toString (Date.second d)
+                ]
+
+            Nothing ->
+                [ text "don't know yet!" ]
   </code></pre>
 </section>
+
 
 <section>
   <h1>Done!</h1>
 </section>
 
+
+
+
+</section>
+
+<section>
+
+
+
+
+<section>
+  <h1>Random GIF Fetcher</h1>
+</section>
+
+<section>
+  <h2>Random GIF Fetcher</h2>
+  <p>Let's talk to an API!</p>
+  <p>https://github.com/Giphy/GiphyAPI</p>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+module Main exposing (..)
+
+import Html exposing (..)
+import Html.Attributes exposing (src)
+import Html.Events exposing (onClick)
+import Http
+import Json.Decode as JD
+
+main =
+    program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = (\model -> Sub.none)
+        }
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher: Model &amp; Init</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+type alias Model =
+    { url : Maybe String
+    , error : Maybe String
+    }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( <span class="fragment highlight-background-yellow">Model Nothing Nothing</span>, Cmd.none )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher: Msg</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+type Msg
+    = Fetch
+    | Display (Result Http.Error String)
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: View</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    div []
+        [ button [ onClick Fetch ] [ text "Fetch!" ]
+        , text <| Maybe.withDefault "" model.error
+        , <span class="fragment highlight-background-yellow">imageView</span> model.url
+        ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: View (pt 2)</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+imageView : Maybe String -> Html Msg
+imageView mString =
+    case mString of
+        Just url ->
+            img [ src url ] []
+
+        Nothing ->
+            text "not fetched"
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: Update</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Fetch ->
+            ( model, <span class="fragment highlight-background-yellow">doFetch</span> )
+
+        Display (Ok url) ->
+            ( { model | url = Just url, error = Nothing }
+            , Cmd.none
+            )
+
+        Display (Err err) ->
+            ( { model | error = Just <| toString err }
+            , Cmd.none
+            )
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: Update (pt 2)</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+randomUrl : String
+randomUrl =
+    "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&rating=g"
+
+doFetch : Cmd Msg
+doFetch =
+    let
+        decoder =
+            JD.at [ "data", "fixed_height_small_url" ] JD.string
+    in
+        Http.get randomUrl decoder
+            |> Http.send Display
+  </code></pre>
+</section>
+
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+
+</section>
+
+<section>
+  <h1>Space-Elm!</h1>
+</section>
+
+<section>
+  <h2>Space-Elm</h2>
+  <p>A multiplayer, cooperative game to<br>survive incoming fields of asteroids</p>
+</section>
+
+<section>
+  <h2>Space-Elm</h2>
+
+  <img src="img/space-elm.png"/>
+</section>
+
+<section>
+  <h2>Modeling the Problem</h2>
+
+  <ul>
+    <li>Me (<kbd>Float</kbd>)</li>
+    <li>Laser (<kbd>Maybe Position</kbd>)</li>
+    <li>Asteroids (<kbd>List Position</kbd>)</li>
+    <li>Score (<kbd>Maybe Int</kbd>)</li>
+    <li>Error (<kbd>Maybe String</kbd>)</li>
+    <li>ActionCable (<kbd>ActionCable</kbd>)</li>
+    <li>KeysDown (<kbd>Set KeyCode</kbd>)</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Types</h2>
+  <pre><code data-trim data-noescape class="elm">
+type alias Model =
+    { myPosition : Float
+    , laser : Maybe Position
+    , asteroids : List Position
+    , score : Maybe Int
+    , error : Maybe String
+    , cable : ActionCable Msg
+    , keysDown : Set.Set Keyboard.KeyCode
+    }
+
+type alias Position =
+    { x : Float
+    , y : Float
+    }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Modeliing the Events</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+type Msg
+    = CableMsg ACMsg.Msg
+    <span class="fragment">| Tick Time.Time</span>
+    <span class="fragment">| CableConnected ()</span>
+    <span class="fragment">| KeyDown Keyboard.KeyCode</span>
+    <span class="fragment">| KeyUp Keyboard.KeyCode</span>
+    <span class="fragment">| DataReceived ID.Identifier JD.Value</span>
+    <span class="fragment">| GenerateAsteroid Position</span>
+  </code></pre>
+</section>
+
+<section>
+  <h2>Handling the Events</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        CableMsg msg_ -> ...
+        CableConnected _ -> ...
+        Tick time -> ...
+        <mark>KeyDown 32</mark> -> ...
+        KeyDown keyCode -> ...
+        KeyUp keyCode -> ...
+        DataReceived _ jsonValue -> ...
+        GenerateAsteroid position -> ...
+</code></pre>
+</section>
+
+<section>
+  <h2>Starting the game</h2>
+
+  <ol>
+    <li class="fragment"><kbd>requestAnimationFrame</kbd> Sub fires</li>
+    <li class="fragment">It fires our <kbd>Tick</kbd> <kbd>Msg</kbd></li>
+    <li class="fragment">We render the view based on the current model</li>
+  </ol>
+
+  <p class="fragment">That's it!<br><small>(we do score handling on the server asynchronously)</small></p>
+</section>
+
+<section>
+  <h2>What's Left?</h2>
+
+  <ul>
+    <li>Actually do the <kbd>subscriptions</kbd></li>
+    <li>Implement each <kbd>update</kbd> case</li>
+    <li>Write the view</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Subscriptions</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ ActionCable.listen CableMsg model.cable
+        , AF.diffs Tick
+        , Keyboard.downs KeyDown
+        , Keyboard.ups KeyUp
+        ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        CableMsg msg_ -> ...
+        CableConnected _ -> ...
+        Tick time -> ...
+        <mark>KeyDown 32</mark> -> ...
+        KeyDown keyCode -> ...
+        KeyUp keyCode -> ...
+        DataReceived _ jsonValue -> ...
+        GenerateAsteroid position -> ...
+</code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>CableMsg</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+    CableMsg msg_ ->
+        ActionCable.update msg_ model.cable
+            |> Tuple.mapFirst (\c -> { model | cable = c })
+
+    -- or
+
+    CableMsg msg_ ->
+        let
+            (newCable, cmd) =
+                ActionCable.update msg_ model.cable
+        in
+            ( { model | cable = newCable }, cmd)
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>CableConnected</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        CableConnected _ ->
+            joinGame model
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+joinGame : Model -> ( Model, Cmd Msg )
+joinGame model =
+    case <mark>subscribeToGame model</mark> of
+        Ok model_cmd ->
+            model_cmd
+
+        Err err ->
+            ( { model
+                | error = Just <| ActionCable.errorToString err
+              }
+            , Cmd.none
+            )
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>CableConnected</kbd> (pt 2)</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+subscribeToGame :
+    Model
+    -> Result ActionCable.ActionCableError ( Model, Cmd Msg )
+subscribeToGame model =
+    let
+        setCable ( newCable, cmd ) =
+            ( { model | cable = newCable }, cmd )
+    in
+        ActionCable.subscribeTo identifier model.cable
+            |> Result.map setCable
+
+
+identifier : ID.Identifier
+identifier =
+    ID.newIdentifier "GamesChannel" []
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>KeyDown</kbd> and <kbd>KeyUp</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        KeyDown 32 ->
+            ( fire model, Cmd.none )
+
+        KeyDown keyCode ->
+            ( { model | keysDown = Set.insert keyCode model.keysDown }
+            , Cmd.none
+            )
+
+        KeyUp keyCode ->
+            ( { model | keysDown = Set.remove keyCode model.keysDown }
+            , Cmd.none
+            )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>KeyDown</kbd> and <kbd>KeyUp</kbd> (pt 2)</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+fire : Model -> Model
+fire <mark>({ laser, myPosition } as model)</mark> =
+    let
+        newLaser =
+            Just <| Position leftEdge (2.5 * myPosition)
+    in
+        case laser of
+            Nothing ->
+                { model | laser = newLaser }
+
+            Just realLaser ->
+                if realLaser.x < 500 then
+                    model
+                else
+                    { model | laser = newLaser }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        Tick time ->
+            tick time model
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+tick : Time.Time -> Model -> ( Model, Cmd Msg )
+tick time model =
+    model
+        |> moveShipAndLaser
+        |> moveAsteroids
+        |> blowUpAsteroid
+        |> postScore
+        |> (\( m, a, cmd ) -> ( m, regenerateAsteroids a cmd ))
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>moveShipAndLaser</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+moveShipAndLaser : Model -> Model
+moveShipAndLaser ({ myPosition } as model) =
+    let
+        moveMe =
+            if Set.member 38 model.keysDown then
+                2.0
+            else if Set.member 40 model.keysDown then
+                -2.0
+            else
+                0.0
+    in
+        { model
+            | myPosition = myPosition + moveMe
+            , laser = Maybe.map <span class="fragment __highlight-current">moveLaser</span> model.laser
+        }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>moveLaser</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+moveLaser : Position -> Position
+moveLaser { x, y } =
+    { x = x + 10, y = y }
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>moveAsteroids</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+moveAsteroids : Model -> ( Model, List Position )
+moveAsteroids model =
+    let
+        move { x, y } =
+            { x = x - 1, y = y }
+
+        ( kept, past ) =
+            model.asteroids
+                |> List.map move
+                |> List.partition (\pos -> pos.x > leftEdge - 50)
+    in
+        ( { model | asteroids = kept }, past )
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>blowUpAsteroid</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+blowUpAsteroid :
+    ( Model, List Position )
+    -> ( Model, List Position, List Position )
+blowUpAsteroid ( model, past ) =
+    case model.laser of
+        Nothing ->
+            ( model, past, [] )
+
+        Just laser ->
+            ...
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>blowUpAsteroid</kbd> pt 2</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        Just laser ->
+            let
+                ( blownUp, keep ) =
+                    List.partition
+                        (detectCollision laser)
+                        model.asteroids
+            in
+                if List.length blownUp > 0 then
+                    ( { model | asteroids = keep, laser = Nothing }
+                    , past
+                    , blownUp
+                    )
+                else
+                    ( model, past, [] )
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>detectCollision</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+detectCollision : Position -> Position -> Bool
+detectCollision laser asteroid =
+    asteroidRadius >
+        (sqrt <|
+            (asteroid.x - laser.x) ^ 2
+                + (asteroid.y - laser.y) ^ 2
+        )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>postScore</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+postScore :
+    ( Model, List Position, List Position )
+    -> ( Model, List Position, Cmd Msg )
+postScore ( model, past, blownUp ) =
+    ( model
+    , <span class="fragment __highlight-current">List.append past blownUp</span>
+    , <span class="fragment __highlight-current">sendScoreUpdate (List.length blownUp) model.cable</span>
+    )
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>sendScoreUpdate</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+sendScoreUpdate : Int -> ActionCable Msg -> Cmd Msg
+sendScoreUpdate int cable =
+    if int > 0 then
+        Result.withDefault Cmd.none <|
+            ActionCable.perform
+                "scoreUpdate"
+                [ ( "score", JE.int int ) ]
+                identifier
+                cable
+    else
+        Cmd.none
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>Tick</kbd>: <kbd>regenerateAsteroids</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+regenerateAsteroids : List Position -> Cmd Msg -> Cmd Msg
+regenerateAsteroids asteroids existingCmd =
+    let
+        regen _ =
+            Random.generate
+                GenerateAsteroid
+                <span class="fragment __highlight-current">asteroidPositionGenerator</span>
+    in
+        asteroids
+            |> List.map regen
+            |> (::) existingCmd
+            |> Cmd.batch
+  </code></pre>
+</section>
+
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>asteroidPositionGenerator</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+asteroidPositionGenerator : Random.Generator Position
+asteroidPositionGenerator =
+    let
+        xGenerator =
+            Random.float 500.0 1500.0
+
+        yGenerator =
+            Random.float -220.0 220.0
+    in
+        Random.map2 Position xGenerator yGenerator
+  </code></pre>
+</section>
+
+
+<section>
+  <h2><kbd>Tick</kbd></h2>
+
+  <h3>done!</h3>
+  <p class="fragment">Are we there yet?</p>
+</section>
+
+
+<section>
+  <h2>Update</h2>
+
+  <p>Two left:</p>
+  <ul>
+    <li><kbd>GenerateAsteroid</kbd></li>
+    <li><kbd>DataReceived</kbd></li>
+  </ul>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>GenerateAsteroid</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        GenerateAsteroid position ->
+            ( { model | asteroids = position :: model.asteroids }
+            , Cmd.none
+            )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>Updates</h2>
+  <h3><kbd>DataReceived</kbd></h3>
+
+  <pre><code data-trim data-noescape class="elm">
+        DataReceived _ jsonValue ->
+            ( dataReceived jsonValue model, Cmd.none )
+  </code></pre>
+
+  <pre><code data-trim data-noescape class="elm">
+dataReceived : JD.Value -> Model -> Model
+dataReceived json model =
+    json
+        |> JD.decodeValue (JD.field "score" JD.int)
+        |> Result.toMaybe
+        |> (\newScore -> { model | score = newScore })
+  </code></pre>
+</section>
+
+<section>
+  <h2>Updates</h2>
+  <h3>Done!</h3>
+
+  <p class="fragment">Now, on to the view!</p>
+</section>
+
+<section>
+  <h2>View</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    Element.toHtml <|
+        C.collage 1000 500 <|
+            gameItems model
+</code></pre>
+</section>
+
+
+<section>
+  <h2>View Items</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+gameItems : Model -> List C.Form
+gameItems model =
+    List.concat
+        [ [ space
+          , connectedSignal model
+          , scoreView model.score
+          , shipView model.myPosition
+          ]
+        , List.map asteroidView model.asteroids
+        , Maybe.withDefault [] <|
+            Maybe.map (laserView >> List.singleton) model.laser
+        ]
+  </code></pre>
+</section>
+
+
+<section>
+    <h2>View Items</h2>
+    <h3>space</h3>
+
+    <pre><code data-trim data-noescape class="elm">
+space : C.Form
+space =
+    C.rect 1000 500
+        |> C.filled Color.black
+  </code></pre>
+</section>
+
+<section>
+  <h2>View Items</h2>
+  <h3>Connected?</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+connectedSignal : Model -> C.Form
+connectedSignal { cable } =
+    let
+      colorFill =
+        if Dict.isEmpty <| ActionCable.subscriptions cable then
+            Color.gray
+        else
+            Color.green
+    in
+        C.circle 5.0
+            |> C.filled colorFill
+            |> C.move ( 490, -240 )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>View Items</h2>
+  <h3>Score</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+scoreView : Maybe Int -> C.Form
+scoreView int =
+    int
+        |> Maybe.map toString
+        |> Maybe.withDefault "?"
+        |> (++) "Score: "
+        |> Text.fromString
+        |> Text.color Color.white
+        |> C.text
+        |> C.move (( 420.0, 240 ))
+  </code></pre>
+</section>
+
+<section>
+  <h2>View Items</h2>
+  <h3>Ship and Laser</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+shipView : Float -> C.Form
+shipView myPosition =
+    C.polygon [ ( -10, -5 ), ( -10, 5 ), ( 10, 0 ) ]
+        |> C.filled Color.white
+        |> C.move ( leftEdge, (250.0 / 100.0 * myPosition) )
+
+
+laserView : Position -> C.Form
+laserView laser =
+    C.rect 20.0 2.0
+        |> C.filled Color.white
+        |> C.move ( laser.x, laser.y )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>View Items</h2>
+  <h3>Asteroids</h3>
+
+  <pre><code data-trim data-noescape class="elm">
+asteroidView : Position -> C.Form
+asteroidView position =
+    C.ngon 7 asteroidRadius
+        |> C.filled Color.gray
+        |> C.move ( position.x, position.y )
+  </code></pre>
+</section>
+
+
+<section>
+  <h1>So close!</h1>
+  <h2 class="fragment">Just gotta kick it off</h2>
+</section>
+
+
+<section>
+  <h2>Init</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+init : ( Model, Cmd Msg )
+init =
+    ( { myPosition = 0.0
+      , laser = Nothing
+      , asteroids = []
+      , score = Nothing
+      , error = Nothing
+      , cable = <span class="fragment __highlight-current">initCable</span>
+      , keysDown = Set.empty
+      }
+    , <span class="fragment __highlight-current">requestRandomAsteroidPositions</span>
+    )
+  </code></pre>
+</section>
+
+<section>
+  <h2><kbd>initCable</kbd></h2>
+
+  <pre><code data-trim data-noescape class="elm">
+initCable : ActionCable Msg
+initCable =
+    ActionCable.initCable "ws://localhost:3000/cable"
+        |> ActionCable.withDebug True
+        |> ActionCable.onWelcome (Just CableConnected)
+        |> ActionCable.onDidReceiveData (Just DataReceived)
+  </code></pre>
+</section>
+
+<section>
+  <h2>initialize asteroids</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+requestRandomAsteroidPositions : Cmd Msg
+requestRandomAsteroidPositions =
+    Random.generate GenerateAsteroid asteroidPositionGenerator
+        |> List.repeat 12
+        |> Cmd.batch
+
+  </code></pre>
+</section>
+
+<section>
+  <h1>Done!</h1>
+  <p><small>Ignoring those little helper functions</small></p>
+</section>
+
+<section>
+  <h1>Thank you!</h1>
+  <p>Brad Grzesiak: @listrophy</p>
+  <p>Bendyworks: @bendyworks</p>
+  <p>Elm: elm-lang.org</p>
+</section>
 
 
 

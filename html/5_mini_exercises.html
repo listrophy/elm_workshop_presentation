@@ -4,6 +4,13 @@
 </section>
 
 <section>
+  <h2>Reference:</h2>
+  <p style="text-align: center;">package.elm-lang.org</p>
+</section>
+
+<section>
+
+<section>
   <h1>Score Keeper</h1>
 </section>
 
@@ -86,6 +93,10 @@
   <h1>Done!</h1>
 </section>
 
+</section>
+
+<section>
+
 <section>
   <h1>Change: Basketball</h1>
 </section>
@@ -160,6 +171,10 @@
 </section>
 
 
+</section>
+
+<section>
+
 
 
 <section>
@@ -230,6 +245,10 @@
 
 
 
+
+</section>
+
+<section>
 
 
 
@@ -304,6 +323,10 @@
 
 
 
+</section>
+
+<section>
+
 
 
 <section>
@@ -362,25 +385,19 @@
 </section>
 
 <section>
-  <h2>Clock: View</h2>
+  <h2>Clock: Subscriptions</h2>
 
   <pre><code data-trim data-noescape class="elm">
-view : Model -> Html Msg
-view model =
-    div [] <mark><|</mark>
-        case model of
-            Just d ->
-                [ text <| ":" ++ toString (Date.second d) ]
-
-            Nothing ->
-                [ text "don't know yet!" ]
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Time.every (100 * Time.millisecond) Tick
   </code></pre>
 </section>
 
 <section>
   <h2>Clock: Update</h2>
 
-  <pre class="fragment"><code data-trim data-noescape class="elm">
+  <pre><code data-trim data-noescape class="elm">
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -390,15 +407,176 @@ update msg model =
 </section>
 
 <section>
-  <h2>Clock: Subscriptions</h2>
+  <h2>Clock: View</h2>
 
-  <pre class="fragment"><code data-trim data-noescape class="elm">
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Time.every (100 * Time.millisecond) Tick
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    div [] <mark><|</mark>
+        case model of
+            Just d ->
+                [ text <| toString (Date.hour d)
+                , text ":"
+                , text <| toString (Date.minute d)
+                , text ":"
+                , text <| toString (Date.second d)
+                ]
+
+            Nothing ->
+                [ text "don't know yet!" ]
+  </code></pre>
+</section>
+
+
+<section>
+  <h1>Done!</h1>
+</section>
+
+
+
+
+</section>
+
+<section>
+
+
+
+
+<section>
+  <h1>Random GIF Fetcher</h1>
+</section>
+
+<section>
+  <h2>Random GIF Fetcher</h2>
+  <p>Let's talk to an API!</p>
+  <p>https://github.com/Giphy/GiphyAPI</p>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+module Main exposing (..)
+
+import Html exposing (..)
+import Html.Attributes exposing (src)
+import Html.Events exposing (onClick)
+import Http
+import Json.Decode as JD
+
+main =
+    program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = (\model -> Sub.none)
+        }
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher: Model &amp; Init</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+type alias Model =
+    { url : Maybe String
+    , error : Maybe String
+    }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( <span class="fragment highlight-background-yellow">Model Nothing Nothing</span>, Cmd.none )
+  </code></pre>
+</section>
+
+
+<section>
+  <h2>GIF Fetcher: Msg</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+type Msg
+    = Fetch
+    | Display (Result Http.Error String)
   </code></pre>
 </section>
 
 <section>
+  <h2>GIF Fetcher: View</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+view : Model -> Html Msg
+view model =
+    div []
+        [ button [ onClick Fetch ] [ text "Fetch!" ]
+        , text <| Maybe.withDefault "" model.error
+        , <span class="fragment highlight-background-yellow">imageView</span> model.url
+        ]
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: View (pt 2)</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+imageView : Maybe String -> Html Msg
+imageView mString =
+    case mString of
+        Just url ->
+            img [ src url ] []
+
+        Nothing ->
+            text "not fetched"
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: Update</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Fetch ->
+            ( model, <span class="fragment highlight-background-yellow">doFetch</span> )
+
+        Display (Ok url) ->
+            ( { model | url = Just url, error = Nothing }
+            , Cmd.none
+            )
+
+        Display (Err err) ->
+            ( { model | error = Just <| toString err }
+            , Cmd.none
+            )
+  </code></pre>
+</section>
+
+<section>
+  <h2>GIF Fetcher: Update (pt 2)</h2>
+
+  <pre><code data-trim data-noescape class="elm">
+randomUrl : String
+randomUrl =
+    "https://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&rating=g"
+
+doFetch : Cmd Msg
+doFetch =
+    let
+        decoder =
+            JD.at [ "data", "fixed_height_small_url" ] JD.string
+    in
+        Http.get randomUrl decoder
+            |> Http.send Display
+  </code></pre>
+</section>
+
+
+<section>
   <h1>Done!</h1>
+</section>
+
+
 </section>

@@ -41,3 +41,13 @@ code.js {
 
 .reveal .slides section .fragment.highlight-background-yellow.visible {
   background-color: #ffff00 !important; }
+
+.reveal .slides section .fragment.__highlight-current {
+  opacity: 1;
+  visibility: visible; }
+
+.reveal .slides section .fragment.__highlight-current.current-fragment {
+  background-color: #ffff00; }
+
+kbd {
+  text-transform: none !important; }
